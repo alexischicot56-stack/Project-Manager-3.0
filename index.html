@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Manager Pro & Chat Live</title>
+    
+    <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+
+    <div id="auth-wrapper" class="auth-container">
+        <div id="welcome-screen" class="app-screen active">
+            <div class="welcome-badge">
+                <ion-icon name="rocket-outline"></ion-icon> Version 2.0 Google Auth
+            </div>
+            <h1 class="welcome-title">Project Manager</h1>
+            <p class="welcome-desc">Organisez vos idées, collaborez en temps réel et discutez en direct via votre compte Google.</p>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon"><ion-icon name="folder-open-outline"></ion-icon></div>
+                    <div class="feature-text">
+                        <h3>Cloud Sync</h3>
+                        <p>Vos projets se synchronisent instantanément en ligne.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><ion-icon name="chatbubbles-outline"></ion-icon></div>
+                    <div class="feature-text">
+                        <h3>Vrai Chat Live</h3>
+                        <p>Ajoutez des utilisateurs et discutez en direct.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-google" onclick="signInWithGoogle()">
+                <ion-icon name="logo-google"></ion-icon> Se connecter avec Google
+            </button>
+        </div>
+    </div>
+
+    <div id="main-app" class="main-app" style="display: none;">
+        <nav class="app-nav">
+            <div class="nav-logo"><ion-icon name="flash"></ion-icon> PM.pro</div>
+            <div class="nav-tabs">
+                <button id="btn-home" class="tab-btn active" onclick="switchTab('view-home')"><ion-icon name="home-outline"></ion-icon> Accueil</button>
+                <button id="btn-projects" class="tab-btn" onclick="switchTab('view-projects')"><ion-icon name="folder-outline"></ion-icon> Projets</button>
+                <button id="btn-chat" class="tab-btn" onclick="switchTab('view-chat')"><ion-icon name="chatbubbles-outline"></ion-icon> Chat</button>
+                <button id="btn-settings" class="tab-btn" onclick="switchTab('view-settings')"><ion-icon name="settings-outline"></ion-icon> Paramètres</button>
+            </div>
+        </nav>
+
+        <div id="view-home" class="tab-view active">
+            <div class="welcome-banner">
+                <h2 id="user-greeting">Bonjour ! 👋</h2>
+                <p>Heureux de vous revoir parmi nous.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="label">Projets en cours</span>
+                    <span id="stat-count" class="number">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Projets clôturés</span>
+                    <span id="tasks-count" class="number">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Heures gagnées</span>
+                    <span id="hours-count" class="number">0h</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-projects" class="tab-view">
+            <div class="projects-header">
+                <h2>Mes Projets</h2>
+                <button class="btn-primary btn-small" onclick="createNewProject()"><ion-icon name="add-outline"></ion-icon> Nouveau Projet</button>
+            </div>
+            <div id="projects-grid" class="projects-grid"></div>
+        </div>
+
+        <div id="view-chat" class="tab-view">
+            <div class="chat-layout">
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Discussions</h3>
+                        <button class="btn-primary btn-small" onclick="addNewUser()"><ion-icon name="person-add-outline"></ion-icon></button>
+                    </div>
+                    <div id="users-list" class="users-list"></div>
+                </div>
+                
+                <div class="chat-window">
+                    <div id="chat-window-blank" class="chat-window-blank">
+                        <ion-icon name="chatbubble-ellipses-outline" style="font-size: 48px; color: var(--text-muted);"></ion-icon>
+                        <p>Sélectionnez un collaborateur accepté pour commencer à discuter.</p>
+                    </div>
+                    
+                    <div id="chat-window-active" class="chat-window-active" style="display: none;">
+                        <div class="chat-active-header">
+                            <div>
+                                <h4 id="active-chat-username"># Salon Général</h4>
+                                <span class="status-indicator">En ligne</span>
+                            </div>
+                            <button class="btn-primary btn-small" onclick="assignUserToProject()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: var(--text-main);">
+                                <ion-icon name="push-outline"></ion-icon> Assigner à un projet
+                            </button>
+                        </div>
+                        <div id="chat-messages-box" class="chat-messages-box"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input-field" placeholder="Écrire un message..." onkeypress="handleChatKeyPress(event)">
+                            <button class="btn-send-msg" onclick="sendChatMessage()"><ion-icon name="send-outline"></ion-icon></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-settings" class="tab-view">
+            <div class="settings-box">
+                <div class="settings-row">
+                    <div class="settings-info">
+                        <h4>Mode Sombre</h4>
+                        <p>Ajuster l'apparence visuelle de l'interface.</p>
+                    </div>
+                    <div class="theme-switch-container">
+                        <button id="theme-light-btn" class="theme-icon-btn" onclick="setTheme('light')"><ion-icon name="sunny-outline"></ion-icon></button>
+                        <button id="theme-dark-btn" class="theme-icon-btn active" onclick="setTheme('dark')"><ion-icon name="moon-outline"></ion-icon></button>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-info">
+                        <h4>Session de travail</h4>
+                        <p>Se déconnecter de l'application en toute sécurité.</p>
+                    </div>
+                    <button class="btn-close-task" style="margin-top:0;" onclick="logOut()"><ion-icon name="log-out-outline"></ion-icon> Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>
